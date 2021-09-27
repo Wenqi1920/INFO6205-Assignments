@@ -4,10 +4,16 @@
 
 package edu.neu.coe.info6205.util;
 
+import com.google.common.collect.Streams;
+import edu.neu.coe.info6205.sort.elementary.InsertionSort;
+
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static edu.neu.coe.info6205.util.Utilities.formatWhole;
 
@@ -125,4 +131,74 @@ public class Benchmark_Timer<T> implements Benchmark<T> {
     private final Consumer<T> fPost;
 
     final static LazyLogger logger = new LazyLogger(Benchmark_Timer.class);
+
+    public static void main(String[] args) {
+
+        Random random = new Random();
+        InsertionSort insertionSort  = new InsertionSort();
+
+        System.out.println("Randomly Ordered Array");
+
+        for(int num = 500; num < 100000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Randomly Ordered Array", null, (x) -> insertionSort.sort(x, 0, x.length), null);
+            int i = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[i];
+                return  Arrays.stream(arr).map(k->random.nextInt(i)).collect(Collectors.toList()).toArray(arr);
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+
+        System.out.println("Ordered Array");
+        for(int num = 500; num < 100000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Ordered Array", null, (x) -> insertionSort.sort(x, 0, x.length), null);
+            int i = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[i];
+                return  Arrays.stream(arr).map(k->random.nextInt(i)).sorted().collect(Collectors.toList()).toArray(arr);
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+
+        System.out.println("Reverse Ordered Array");
+        for(int num = 500; num < 100000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Reverse Ordered Array", null, (x) -> insertionSort.sort(x, 0, x.length), null);
+            int i = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[i];
+                return  Arrays.stream(arr).map(k->random.nextInt(i)).sorted(Comparator.reverseOrder()).collect(Collectors.toList()).toArray(arr);
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+
+        System.out.println("Partially Ordered Array");
+        for(int num = 500; num < 100000; num *=2) {
+            Benchmark_Timer<Integer[]> benchmark_Timer = new Benchmark_Timer<>("Partially Ordered Array", null, (x) -> insertionSort.sort(x, 0, x.length), null);
+            int i = num;
+            Supplier<Integer[]> supplier = () -> {
+                Integer[] arr = new Integer[i];
+                List<Integer> l0 = Arrays.stream(arr).map(k->random.nextInt(i)).sorted().collect(Collectors.toList());
+
+                List<Integer> l1 = IntStream.range(0, i/2).mapToObj((k) -> l0.get(k)).collect(Collectors.toList());
+
+                List<Integer> l2 = IntStream.range(i/2, i).mapToObj((k) -> l0.get(k)).collect(Collectors.toList());
+
+                Collections.shuffle(l2);
+
+                return Streams.concat(l1.stream(),l2.stream()).collect(Collectors.toList()).toArray(arr);
+
+            };
+            double time = benchmark_Timer.runFromSupplier(supplier, 50);
+            System.out.println(num + "" + " Time: " + time);
+        }
+        System.out.println("\n");
+    }
+
+
 }
