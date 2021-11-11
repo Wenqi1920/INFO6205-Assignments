@@ -16,14 +16,24 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class Main {
 
+    public static int thread = 2;
+    public static ForkJoinPool pool =  new ForkJoinPool(thread);
+
     public static void main(String[] args) {
         processArgs(args);
-        System.out.println("Degree of parallelism: " + ForkJoinPool.getCommonPoolParallelism());
+        System.out.println("Degree of parallelism: " + pool.getParallelism());
         Random random = new Random();
-        int[] array = new int[2000000];
+//        int[] array = new int[2000000];
+        int arrayLength = 1000000;
+        int[] array = new int[arrayLength];
         ArrayList<Long> timeList = new ArrayList<>();
-        for (int j = 50; j < 100; j++) {
-            ParSort.cutoff = 10000 * (j + 1);
+        System.out.println("The array size is: " + arrayLength);
+
+        int cutOff = 160000;
+
+        for (int j = 0; j < 100; j++) {
+            ParSort.cutoff = cutOff * (j + 1);
+//            ParSort.cutoff = 10000 * (j + 1);
             // for (int i = 0; i < array.length; i++) array[i] = random.nextInt(10000000);
             long time;
             long startTime = System.currentTimeMillis();
@@ -35,8 +45,8 @@ public class Main {
             time = (endTime - startTime);
             timeList.add(time);
 
-
-            System.out.println("cutoff：" + (ParSort.cutoff) + "\t\t10times Time:" + time + "ms");
+//            System.out.println("cutoff：" + (ParSort.cutoff) + "\t\t10times Time:" + time + "ms");
+            System.out.println("cutoff：" +  (double)(ParSort.cutoff) + "\t\t10 times Time:" + time + "ms" + "\t\tCutOff/Array" + (double) ParSort.cutoff / arrayLength);
 
         }
         try {
@@ -45,7 +55,7 @@ public class Main {
             BufferedWriter bw = new BufferedWriter(isr);
             int j = 0;
             for (long i : timeList) {
-                String content = (double) 10000 * (j + 1) / 2000000 + "," + (double) i / 10 + "\n";
+                String content = (double) cutOff * (j + 1) / arrayLength + "," + (double) i / 10 + "\n";
                 j++;
                 bw.write(content);
                 bw.flush();
